@@ -1,4 +1,3 @@
-voltagelog.py
 #!/usr/bin/env python3
 import csv
 import logging
