@@ -21,14 +21,25 @@ from ina226 import INA226
 from time import sleep, time
 
 def log_voltage_data(ina, interval, duration, filename, threshold):
-    start_time = time()
-    last_logged_voltage = None  # Variable to store the last logged voltage
+    start_time = datetime.now()
+    start_timestamp = start_time.strftime('%Y%m%d_%H:%M:%S')
+    filename_with_timestamp = f"{filename}_{start_timestamp}.csv"
+    starting_voltage = ina.voltage()
 
-    with open(filename, mode='w', newline='') as file:
+    with open(filename_with_timestamp, mode='w', newline='') as file:
+        # Write a header block
+        file.write("Monitoring Start Time: {}\n".format(start_time.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]))
+        file.write("Monitoring Interval (seconds): {}\n".format(interval))
+        file.write("Logging Duration (seconds): {}\n".format(duration))
+        file.write("Voltage Change Threshold (volts): {}\n".format(threshold))
+        file.write("Starting Voltage (V): {:.3f}\n".format(starting_voltage))
+        file.write("\n")  # Extra newline for separation
         writer = csv.writer(file)
         writer.writerow(['Timestamp', 'Bus Voltage (V)'])
 
-        while time() - start_time < duration:
+        last_logged_voltage = None  # Variable to store the last logged voltage
+
+        while (datetime.now() - start_time).total_seconds() < duration:
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]  # Including milliseconds
             bus_voltage = ina.voltage()
 
@@ -53,14 +64,13 @@ if __name__ == "__main__":
     try:
         # Configure monitoring interval, logging duration, and voltage change threshold
         monitoring_interval = 0.1  # seconds
-        logging_duration = 1 * 60  # 5 minutes in seconds
-        voltage_change_threshold = 0.01  # volts
-        output_file = 'efficient_log.csv'
+        logging_duration = 5 * 60  # 5 minutes in seconds
+        voltage_change_threshold = 0.5  # volts
+        base_output_file = 'voltage_log'
         
-        log_voltage_data(ina, monitoring_interval, logging_duration, output_file, voltage_change_threshold)
+        log_voltage_data(ina, monitoring_interval, logging_duration, base_output_file, voltage_change_threshold)
     except KeyboardInterrupt:
         print("Monitoring stopped by user.")
     finally:
         ina.sleep()
         print("Device is now in sleep mode.")
-
