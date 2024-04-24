@@ -54,6 +54,24 @@ def log_voltage_data(ina, interval, duration, filename, threshold):
 
             sleep(interval)
 
+def get_user_input():
+    print("Default Monitoring Configuration:")
+    print("Monitoring Interval: 0.1 seconds")
+    print("Logging Duration: 5 minutes")
+    print("Voltage Change Threshold: 0.5 volts")
+    use_defaults = input("Do you want to use these default settings? (Y or N): ")
+    
+    if use_defaults.lower() == 'n':
+        interval = float(input("Enter monitoring interval in seconds (decimal): "))
+        duration = float(input("Enter logging duration in minutes: ")) * 60  # Convert minutes to seconds
+        threshold = float(input("Enter voltage change threshold in volts (decimal): "))
+    else:
+        interval = 0.1
+        duration = 5 * 60  # 5 minutes in seconds
+        threshold = 0.5
+    
+    return interval, duration, threshold
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     ina = INA226(busnum=1, max_expected_amps=25, log_level=logging.INFO)
@@ -61,14 +79,11 @@ if __name__ == "__main__":
     ina.set_low_battery(5)
     ina.wake()
     
+    interval, duration, threshold = get_user_input()
+    
     try:
-        # Configure monitoring interval, logging duration, and voltage change threshold
-        monitoring_interval = 0.1  # seconds
-        logging_duration = 5 * 60  # 5 minutes in seconds
-        voltage_change_threshold = 0.5  # volts
         base_output_file = 'voltage_log'
-        
-        log_voltage_data(ina, monitoring_interval, logging_duration, base_output_file, voltage_change_threshold)
+        log_voltage_data(ina, interval, duration, base_output_file, threshold)
     except KeyboardInterrupt:
         print("Monitoring stopped by user.")
     finally:
