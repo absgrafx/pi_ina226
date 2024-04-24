@@ -23,7 +23,8 @@ from time import sleep, time
 def log_voltage_data(ina, interval, duration, filename, threshold):
     start_time = datetime.now()
     start_timestamp = start_time.strftime('%Y%m%d_%H:%M:%S')
-    filename_with_timestamp = f"{filename}_{start_timestamp}.csv"
+    start_shorttime =  start_time.strftime('%Y%m%d%H%M%S')
+    filename_with_timestamp = f"{filename}_{start_shorttime}.csv"
     starting_voltage = ina.voltage()
 
     with open(filename_with_timestamp, mode='w', newline='') as file:
@@ -82,7 +83,7 @@ if __name__ == "__main__":
     interval, duration, threshold = get_user_input()
     
     try:
-        base_output_file = 'voltage_log'
+        base_output_file = 'vlog'
         log_voltage_data(ina, interval, duration, base_output_file, threshold)
     except KeyboardInterrupt:
         print("Monitoring stopped by user.")
